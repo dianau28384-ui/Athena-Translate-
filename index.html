@@ -3,24 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kagi-Style Personal Translator</title>
+    <title>Athena-Translate</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --success: #10b981;
-            --danger: #ef4444;
+            --bg-main: #131316;
+            --bg-card: #1c1c21;
+            --bg-input: #252529;
+            --text-main: #e4e4e7;
+            --text-muted: #a1a1aa;
+            --accent: #7c3aed; /* สีม่วง Kagi */
+            --border: #2e2e33;
         }
 
         body {
-            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             margin: 0;
             padding: 0;
             display: flex;
@@ -29,264 +27,202 @@
         }
 
         .container {
-            max-width: 1000px;
-            margin: 40px auto;
+            max-width: 800px;
+            margin: 60px auto;
             padding: 0 20px;
             flex: 1;
         }
 
         header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         h1 {
             font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 10px;
-            font-weight: 800;
-            letter-spacing: -0.05em;
+            color: var(--text-main);
+            margin-bottom: 5px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
         }
 
-        .subtitle {
-            color: var(--text-light);
-            font-size: 1.1rem;
-            margin: 0;
-        }
+        h1 span { color: var(--accent); }
+        .subtitle { color: var(--text-muted); font-size: 1rem; margin: 0; }
 
-        /* Translator Layout */
+        /* Kagi Style Translator UI */
         .translator-card {
-            background: var(--card-bg);
+            background: var(--bg-card);
             border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border);
             padding: 24px;
-            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .workspace {
             display: flex;
-            align-items: center;
-            gap: 20px;
+            flex-direction: column;
         }
 
         .box {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
-        label {
+        .lang-header {
             font-weight: 600;
             font-size: 0.95rem;
-            color: var(--text);
+            color: var(--text-muted);
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge-kagi {
+            background-color: #2e2545;
+            color: #d8b4fe;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid #582dbb;
+            font-weight: bold;
         }
 
         textarea {
             width: 100%;
-            height: 200px;
-            padding: 16px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            height: 120px;
+            padding: 15px 0;
+            border: none;
             resize: none;
-            font-size: 16px;
+            font-size: 1.4rem;
             line-height: 1.6;
-            color: var(--text);
-            background-color: var(--bg);
+            color: var(--text-main);
+            background-color: transparent;
             box-sizing: border-box;
-            transition: all 0.2s;
-        }
-
-        textarea:focus {
             outline: none;
-            border-color: var(--primary);
-            background-color: var(--card-bg);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
         }
 
-        textarea[readonly] {
-            background-color: #f1f5f9;
-            cursor: default;
+        textarea::placeholder { color: #4b4b52; }
+
+        .divider-container {
+            position: relative;
+            margin: 15px 0;
+            border-top: 1px solid var(--border);
         }
 
         .btn-swap {
-            background-color: var(--card-bg);
+            background-color: var(--bg-input);
             border: 1px solid var(--border);
-            color: var(--primary);
-            width: 48px;
-            height: 48px;
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            font-size: 22px;
+            font-size: 18px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
             transition: all 0.2s;
-            margin-top: 26px;
-            flex-shrink: 0;
         }
 
         .btn-swap:hover {
-            background-color: var(--primary);
+            background-color: var(--accent);
             color: white;
-            border-color: var(--primary);
-            transform: scale(1.08);
+            border-color: var(--accent);
         }
 
-        /* Custom Dictionary Section */
-        .dict-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        /* ส่วนคำแนะนำอธิบายภาษา */
+        .info-card {
+            margin-top: 30px;
+            background: rgba(28, 28, 33, 0.5);
+            border-radius: 12px;
             border: 1px solid var(--border);
-            padding: 24px;
-        }
-
-        .dict-card h2 {
-            margin-top: 0;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .dict-inputs {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .dict-inputs input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .dict-inputs input:focus {
-            border-color: var(--primary);
-        }
-
-        .btn-add {
-            background-color: var(--success);
-            color: white;
-            border: none;
-            padding: 0 24px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-add:hover { background-color: #059669; }
-
-        .tags-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .dict-tag {
-            background: #eff6ff;
-            color: var(--primary);
-            padding: 6px 14px;
-            border-radius: 9999px;
+            padding: 20px;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid #bfdbfe;
-            font-weight: 500;
+            color: var(--text-muted);
         }
 
-        .dict-tag span {
-            cursor: pointer;
-            color: var(--danger);
-            font-weight: bold;
-            font-size: 16px;
-            line-height: 1;
-        }
-
-        .dict-tag span:hover { color: #b91c1c; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .workspace { flex-direction: column; gap: 10px; }
-            .btn-swap { margin-top: 0; transform: rotate(90deg); }
-            .btn-swap:hover { transform: rotate(90deg) scale(1.08); }
-            .dict-inputs { flex-direction: column; }
-            .btn-add { padding: 12px; }
-            .container { margin: 20px auto; }
-        }
+        .info-card ul { margin: 10px 0 0 0; padding-left: 20px; }
+        .info-card li { margin-bottom: 5px; }
+        .info-card strong { color: var(--text-main); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Custom Translator</h1>
-        <p class="subtitle">ระบบแปลภาษาส่วนตัวแบบออฟไลน์ ล็อคคำศัพท์ได้ตามใจชอบ</p>
+        <h1>✨ Athena-<span>Translate</span></h1>
+        <p class="subtitle">เครื่องมือแปลภาษาประดิษฐ์ (Custom Language Model)</p>
     </header>
 
     <div class="translator-card">
         <div class="workspace">
-            <div class="box">
-                <label id="lblSource">ภาษาอังกฤษ (English)</label>
-                <textarea id="sourceText" placeholder="พิมพ์ข้อความที่นี่เพื่อแปลทันที..." oninput="translateLocal()"></textarea>
-            </div>
-            
-            <button class="btn-swap" onclick="swapLanguages()" title="สลับภาษา">⇄</button>
             
             <div class="box">
-                <label id="lblTarget">ภาษาไทย (Thai)</label>
-                <textarea id="targetText" placeholder="ผลลัพธ์การแปลจะปรากฏตรงนี้..." readonly></textarea>
+                <div class="lang-header">
+                    <span id="lblSource">Thai (ภาษาไทย)</span>
+                </div>
+                <textarea id="sourceText" placeholder="พิมพ์ภาษาไทยธรรมดาลงไปที่นี่..." oninput="translateCustomLanguage()"></textarea>
             </div>
+            
+            <div class="divider-container">
+                <button class="btn-swap" onclick="swapLanguages()">⇅</button>
+            </div>
+            
+            <div class="box">
+                <div class="lang-header">
+                    <span id="lblTarget">Isekai-Byte (ภาษาต่างโลก)</span>
+                    <span class="badge-kagi">Custom Lang 💎</span>
+                </div>
+                <textarea id="targetText" placeholder="ผลลัพธ์ภาษาคัสตอม..." readonly></textarea>
+            </div>
+
         </div>
     </div>
 
-    <div class="dict-card">
-        <h2>⚙️ Kagi-Style Custom Dictionary</h2>
-        <p style="color: var(--text-light); font-size: 14px; margin-top: -5px; margin-bottom: 20px;">
-            กำหนดคำแปลเฉพาะทางเพื่อไม่ให้ระบบแปลผิด (ระบบจะอิงตามทิศทางภาษาต้นฉบับในปัจจุบัน)
-        </p>
-        
-        <div class="dict-inputs">
-            <input type="text" id="origWord" placeholder="คำต้นฉบับ (เช่น apple)">
-            <input type="text" id="customTrans" placeholder="คำแปลที่ต้องการ (เช่น บริษัทแอปเปิ้ล)">
-            <button class="btn-add" onclick="addCustomWord()">เพิ่มคำศัพท์</button>
-        </div>
-
-        <div class="tags-container" id="dictTags">
-            </div>
+    <div class="info-card">
+        <strong>📖 คำอธิบายระบบดักแปลฐานข้อมูลคำศัพท์ (Athena Engine):</strong>
+        <p>เว็บนี้ทำงานโดยใช้คลังคำศัพท์ Custom Language ที่คุณดีไซน์ขึ้นมาเองแบบออฟไลน์ 100% ตัวอย่างคำศัพท์ที่ระบบจำได้ในตอนนี้:</p>
+        <ul>
+            <li>สวัสดี ➔ <strong>กำเนิดใหม่ในต่างโลกพร้อมกับพลังสุดแกร่งเพื่อทักทายเจ้ายังไงล่ะ</strong></li>
+            <li>หิวข้าว ➔ <strong>พลังงานเวทมนตร์ต่ำกว่าขีดจำกัด จำเป็นต้องเติมเต็มด้วยสารอาหารด่วน</strong></li>
+            <li>ห้องน้ำ ➔ <strong>เขตกักเก็บพลังงานเสียแห่งสรวงสวรรค์</strong></li>
+            <li>เงิน ➔ <strong>ผลึกคริสตัลแห่งการแลกเปลี่ยนพันธสัญญา</strong></li>
+        </ul>
     </div>
 </div>
 
 <script>
-    let isEnToTh = true;
+    // สถานะภาษา: true = ไทย -> ต่างโลก, false = ต่างโลก -> ไทย
+    let isThToCustom = true;
 
-    // คลังคำศัพท์ตั้งต้น (คุณเพิ่มคำศัพท์ที่ต้องการตรงนี้ได้เลย)
-    const mainDictionaryEnToTh = {
-        "hello": "สวัสดี", "world": "โลก", "cat": "แมว", "dog": "สุนัข",
-        "apple": "แอปเปิ้ล (ผลไม้)", "banana": "กล้วย", "computer": "คอมพิวเตอร์",
-        "love": "รัก", "thank you": "ขอบคุณ", "good morning": "อรุณสวัสดิ์"
+    // 🛠️ ตารางพจนานุกรม "ภาษาคัสตอม" ของคุณ (คุณสามารถมาเพิ่ม-ลด คำศัพท์ตรงนี้ได้ตามใจชอบเลยครับ!)
+    const customLanguageMap = {
+        "สวัสดี": "กำเนิดใหม่ในต่างโลกพร้อมกับพลังสุดแกร่งเพื่อทักทายเจ้ายังไงล่ะ",
+        "หิวข้าว": "พลังงานเวทมนตร์ต่ำกว่าขีดจำกัด จำเป็นต้องเติมเต็มด้วยสารอาหารด่วน",
+        "กินข้าว": "ทำพันธสัญญากลืนกินสารอาหารกู้โลก",
+        "ห้องน้ำ": "เขตกักเก็บพลังงานเสียแห่งสรวงสวรรค์",
+        "เงิน": "ผลึกคริสตัลแห่งการแลกเปลี่ยนพันธสัญญา",
+        "ไปนอน": "จำศีลเพื่อฟื้นฟูพลังแห่งความมืด",
+        "รัก": "สลักตราประทับวิญญาณผูกมัดนิรันดร์",
+        "เพื่อน": "ผู้ร่วมชะตากรรมในหน้าประวัติศาสตร์",
+        "ขอบคุณ": "จงภูมิใจที่การกระทำของเจ้าทำให้ผู้สืบทอดพลังอย่างข้าพึงพอใจ"
     };
 
-    const mainDictionaryThToEn = {
-        "สวัสดี": "hello", "โลก": "world", "แมว": "cat", "สุนัข": "dog",
-        "แอปเปิ้ล": "apple", "กล้วย": "banana", "คอมพิวเตอร์": "computer",
-        "รัก": "love", "ขอบคุณ": "thank you", "อรุณสวัสดิ์": "good morning"
-    };
+    // ฟังก์ชันกลับพจนานุกรมอัตโนมัติสำหรับขาแปลงกลับ (ต่างโลก -> ไทย)
+    const reverseLanguageMap = {};
+    for (const [key, value] of Object.entries(customLanguageMap)) {
+        reverseLanguageMap[value] = key;
+    }
 
-    let customDictEnToTh = JSON.parse(localStorage.getItem('customDictEnToTh')) || {};
-    let customDictThToEn = JSON.parse(localStorage.getItem('customDictThToEn')) || {};
-
-    function translateLocal() {
+    // ฟังก์ชันคำนวณแปลภาษา Custom
+    function translateCustomLanguage() {
         const sourceText = document.getElementById('sourceText').value;
         const targetTextArea = document.getElementById('targetText');
         
@@ -295,108 +231,50 @@
             return;
         }
 
-        const currentMain = isEnToTh ? mainDictionaryEnToTh : mainDictionaryThToEn;
-        const currentCustom = isEnToTh ? customDictEnToTh : customDictThToEn;
-        const finalDictionary = { ...currentMain, ...currentCustom };
-
+        // เลือกพจนานุกรมตามทิศทางที่เลือก
+        const currentMap = isThToCustom ? customLanguageMap : reverseLanguageMap;
         let translatedText = sourceText;
-        const sortedKeys = Object.keys(finalDictionary).sort((a, b) => b.length - a.length);
 
+        // เรียงลำดับคำในพจนานุกรมจากยาวไปสั้น เพื่อความแม่นยำในการแทนที่คำศัพท์
+        const sortedKeys = Object.keys(currentMap).sort((a, b) => b.length - a.length);
+
+        // ทำการไล่เปลี่ยนคำศัพท์ทีละคำ
         for (const key of sortedKeys) {
-            let regex;
-            if (isEnToTh) {
-                regex = new RegExp(`\\b${key}\\b`, 'gi');
-            } else {
-                regex = new RegExp(key, 'g');
-            }
-            translatedText = translatedText.replace(regex, finalDictionary[key]);
+            const regex = new RegExp(key, 'g');
+            translatedText = translatedText.replace(regex, currentMap[key]);
         }
 
+        // แสดงผลลัพธ์
         targetTextArea.value = translatedText;
     }
 
+    // ฟังก์ชันสลับฝั่งภาษา (ปุ่มตรงกลาง)
     function swapLanguages() {
         const sourceText = document.getElementById('sourceText');
         const targetText = document.getElementById('targetText');
         const lblSource = document.getElementById('lblSource');
         const lblTarget = document.getElementById('lblTarget');
-        const origWordInput = document.getElementById('origWord');
-        const customTransInput = document.getElementById('customTrans');
 
-        isEnToTh = !isEnToTh;
+        isThToCustom = !isThToCustom;
 
-        if (isEnToTh) {
-            lblSource.innerText = "ภาษาอังกฤษ (English)";
-            lblTarget.innerText = "ภาษาไทย (Thai)";
-            origWordInput.placeholder = "คำอังกฤษ (เช่น cat)";
-            customTransInput.placeholder = "คำแปลไทย (เช่น เหมียว)";
+        if (isThToCustom) {
+            lblSource.innerText = "Thai (ภาษาไทย)";
+            lblTarget.innerText = "Isekai-Byte (ภาษาต่างโลก)";
+            sourceText.placeholder = "พิมพ์ภาษาไทยธรรมดาลงไปที่นี่...";
         } else {
-            lblSource.innerText = "ภาษาไทย (Thai)";
-            lblTarget.innerText = "ภาษาอังกฤษ (English)";
-            origWordInput.placeholder = "คำไทย (เช่น เหมียว)";
-            customTransInput.placeholder = "คำแปลอังกฤษ (เช่น cat)";
+            lblSource.innerText = "Isekai-Byte (ภาษาต่างโลก)";
+            lblTarget.innerText = "Thai (ภาษาไทย)";
+            sourceText.placeholder = "พิมพ์ภาษาต่างโลกสุดเบียวลงไป...";
         }
 
-        const tempText = sourceText.value;
+        // สลับข้อความในกล่อง
+        const temp = sourceText.value;
         sourceText.value = targetText.value;
-        targetText.value = tempText;
+        targetText.value = temp;
 
-        renderTags();
-        translateLocal();
+        // สั่งแปลใหม่อีกรอบหลังสลับฝั่ง
+        translateCustomLanguage();
     }
-
-    function renderTags() {
-        const container = document.getElementById('dictTags');
-        container.innerHTML = '';
-        const currentCustom = isEnToTh ? customDictEnToTh : customDictThToEn;
-
-        for (const [key, value] of Object.entries(currentCustom)) {
-            container.innerHTML += `
-                <div class="dict-tag">
-                    <strong>${key}</strong> ➔ ${value}
-                    <span onclick="deleteWord('${key}')">×</span>
-                </div>
-            `;
-        }
-    }
-
-    function addCustomWord() {
-        const origInput = document.getElementById('origWord');
-        const transInput = document.getElementById('customTrans');
-        let orig = origInput.value.trim();
-        let trans = transInput.value.trim();
-        
-        if (isEnToTh) orig = orig.toLowerCase();
-        else trans = trans.toLowerCase();
-
-        if (orig && trans) {
-            if (isEnToTh) {
-                customDictEnToTh[orig] = trans;
-                localStorage.setItem('customDictEnToTh', JSON.stringify(customDictEnToTh));
-            } else {
-                customDictThToEn[orig] = trans;
-                localStorage.setItem('customDictThToEn', JSON.stringify(customDictThToEn));
-            }
-            renderTags();
-            translateLocal();
-            origInput.value = '';
-            transInput.value = '';
-        }
-    }
-
-    function deleteWord(key) {
-        if (isEnToTh) {
-            delete customDictEnToTh[key];
-            localStorage.setItem('customDictEnToTh', JSON.stringify(customDictEnToTh));
-        } else {
-            delete customDictThToEn[key];
-            localStorage.setItem('customDictThToEn', JSON.stringify(customDictThToEn));
-        }
-        renderTags();
-        translateLocal();
-    }
-
-    renderTags();
 </script>
 
 </body>
